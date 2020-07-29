@@ -50,7 +50,7 @@ class Schema(object):
         :return: bool
         """
         rule = self.tree.get(Rule.to_negative(key))
-        if rule is not None and not rule:  # Negative rule got no ancestors
+        if rule is not None and None in rule:
             return False
         return key in self.tree or self.is_greedy
 
@@ -80,8 +80,8 @@ class Schema(object):
                 if tail:
                     self.tree[head].add(tail)
             else:
-                self.tree[head] = {tail} if tail else set()
-        # logger.info(f'Got tree:{self.tree}')
+                self.tree[head] = {tail} if tail else {None}
+        logger.info(f'Got tree:{self.tree}')
 
     def get_rules(self, key=None):
         """
@@ -101,7 +101,10 @@ class Schema(object):
             for head, bunch in self.tree.items():
                 if bunch:
                     for rule in bunch:
-                        rules.add(head.concat(rule))
+                        if rule is None:
+                            rules.add(head)
+                        else:
+                            rules.add(head.concat(rule))
                 else:
                     rules.add(head)
         return rules
